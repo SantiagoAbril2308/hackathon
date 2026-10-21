@@ -14,7 +14,14 @@ aplicarApariencia();
 
 // PWA-02: service worker propio. Se actualiza solo cuando hay una versión nueva.
 if ('serviceWorker' in navigator) {
-  registerSW({ immediate: true });
+  if (import.meta.env.DEV) {
+    // En desarrollo no hay service worker: se quita el de un build anterior en este puerto,
+    // porque si no seguiría entregando la versión vieja guardada en caché.
+    navigator.serviceWorker.getRegistrations().then((registros) => registros.forEach((r) => r.unregister()));
+    caches?.keys().then((claves) => claves.forEach((c) => caches.delete(c)));
+  } else {
+    registerSW({ immediate: true });
+  }
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(
