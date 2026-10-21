@@ -25,6 +25,11 @@ export const env = {
     .map((o) => o.trim())
     .filter(Boolean),
   scraperCron: process.env.SCRAPER_CRON || '0 3 * * *',
+  scraperListaBlanca: (process.env.SCRAPER_LISTA_BLANCA || '')
+    .split(',')
+    .map((d) => d.trim().toLowerCase())
+    .filter(Boolean),
+  jobsActivos: process.env.JOBS_ACTIVOS !== 'false',
   diasVigencia: entero(process.env.DIAS_VIGENCIA, 30),
   adminSeed: {
     email: process.env.ADMIN_SEED_EMAIL || '',

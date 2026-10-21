@@ -106,6 +106,23 @@ Un servicio se publica como **vigente** solo si tiene `estado = 'vigente'`, `url
 
 Los errores siempre tienen la forma `{ "error": "...", "detalles"?: [{ "campo", "mensaje" }] }`.
 
+## Scraper y jobs
+
+El scraper **nunca modifica `servicios`**: solo propone filas en `cambios_pendientes`, que un administrador aprueba o rechaza.
+
+- Solo lee dominios de la lista blanca (`SCRAPER_LISTA_BLANCA`, por defecto `minsalud.gov.co`, `meta.gov.co`, `villavicencio.gov.co` y sus subdominios), solo por https, y bloquea redirecciones hacia otros dominios.
+- Respeta `robots.txt` (si no se puede leer, no lee la página), hace como máximo 1 solicitud cada 5 s por dominio y se identifica como `RutaSerenaBot/1.0`.
+- Extrae el bloque indicado por `selector_css` de cada fuente, busca teléfonos colombianos (fijos `60…` de 10 dígitos, celulares `3…` de 10 dígitos y líneas cortas de 3 dígitos) y calcula un hash SHA-256. Si el hash cambia, compara los teléfonos con los canales de los servicios de esa fuente y propone los cambios. La primera lectura solo fija la línea base.
+
+Jobs (node-cron, hora de Colombia), activos al iniciar el servidor salvo `JOBS_ACTIVOS=false`:
+
+| Job | Cuándo | Qué hace |
+| --- | --- | --- |
+| Scraper | `SCRAPER_CRON` (por defecto 3:00 a. m.) | Lee las fuentes activas |
+| Vencimiento | 00:05 todos los días y al arrancar | Pasa a `en_revision` lo que supere `DIAS_VIGENCIA` |
+
+Ejecución manual: `npm run jobs:scraper` y `npm run jobs:vencimiento`.
+
 ## Pruebas
 
 ```bash
