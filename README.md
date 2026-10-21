@@ -69,12 +69,51 @@ cd frontend
 npm run dev
 ```
 
+## API
+
+Un servicio se publica como **vigente** solo si tiene `estado = 'vigente'`, `url_fuente`, `fecha_verificacion` y esa fecha no supera `DIAS_VIGENCIA` días. Si no, aparece como `en_revision`.
+
+### Pública (con límite de peticiones; no se registran IPs)
+
+| Método | Ruta | Descripción |
+| --- | --- | --- |
+| GET | `/api/salud` | Estado de la API y de la base de datos |
+| GET | `/api/servicios?tema=&publico=&modalidad=&q=` | Servicios vigentes con canales, fuente y fecha |
+| GET | `/api/servicios/:id` | Detalle; si está vencido devuelve `estado: en_revision` |
+| GET | `/api/emergencia` | Servicios de emergencia ordenados por `orden` + línea 123 |
+| GET | `/api/directorio.json` | Copia de lo vigente con `generado_en` (uso sin conexión) |
+| POST | `/api/reportes` | `{ servicio_id, canal_id?, motivo }`. Sube la prioridad; con 3 reportes desde la última verificación pasa a `en_revision` |
+| GET | `/api/actividades` | Actividades aprobadas desde hoy |
+
+### Administración (`Authorization: Bearer <token>`)
+
+| Método | Ruta |
+| --- | --- |
+| POST | `/api/admin/login` |
+| GET, POST | `/api/admin/servicios` |
+| GET, PUT, DELETE | `/api/admin/servicios/:id` (DELETE = retirar) |
+| POST | `/api/admin/servicios/:id/verificar` `{ resultado, nota?, url_fuente? }` |
+| GET (`?servicio_id=`), POST | `/api/admin/canales` |
+| PUT, DELETE | `/api/admin/canales/:id` |
+| GET, POST | `/api/admin/fuentes` |
+| GET, PUT, DELETE | `/api/admin/fuentes/:id` (DELETE = desactivar) |
+| GET | `/api/admin/cambios?estado=pendiente\|aprobado\|rechazado\|todos` |
+| POST | `/api/admin/cambios/:id/aprobar`, `/api/admin/cambios/:id/rechazar` |
+| GET | `/api/admin/reportes` |
+| GET | `/api/admin/actividades?estado=` |
+| POST | `/api/admin/actividades/:id/aprobar`, `/api/admin/actividades/:id/rechazar` |
+| POST | `/api/admin/scraper/ejecutar` |
+
+Los errores siempre tienen la forma `{ "error": "...", "detalles"?: [{ "campo", "mensaje" }] }`.
+
 ## Pruebas
 
 ```bash
 cd backend && npm test
 cd frontend && npm test
 ```
+
+Las pruebas de integración del backend usan una base **aparte**, `ruta_serena_test`, en el mismo clúster. La crean y la vuelven a llenar con el seed sintético en cada ejecución; la base de desarrollo no se toca. Sin `DB_HOST` en `backend/.env`, esas pruebas se omiten y solo corren las unitarias.
 
 ## Reglas del proyecto
 

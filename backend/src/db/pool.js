@@ -1,5 +1,6 @@
 import mysql from 'mysql2/promise';
 import { env } from '../config/env.js';
+import { HttpError } from '../utils/httpError.js';
 
 // Hora de Colombia para que CURDATE() y las fechas de verificación coincidan con el calendario local.
 export const ZONA_HORARIA = '-05:00';
@@ -51,7 +52,12 @@ let pool = null;
 
 export function getPool() {
   if (!pool) {
-    validarConfiguracion();
+    try {
+      validarConfiguracion();
+    } catch (err) {
+      console.error(err.message);
+      throw new HttpError(503, 'El servicio no está disponible en este momento');
+    }
     pool = mysql.createPool(configuracionPool());
     pool.pool.on('connection', (conn) => {
       conn.query(`SET time_zone = '${ZONA_HORARIA}'`);
@@ -63,6 +69,22 @@ export function getPool() {
 export async function query(sql, params = []) {
   const [rows] = await getPool().query(sql, params);
   return rows;
+}
+
+/** Ejecuta `fn(conn)` dentro de una transacción; hace rollback si algo falla. */
+export async function conTransaccion(fn) {
+  const conn = await getPool().getConnection();
+  try {
+    await conn.beginTransaction();
+    const resultado = await fn(conn);
+    await conn.commit();
+    return resultado;
+  } catch (err) {
+    await conn.rollback().catch(() => {});
+    throw err;
+  } finally {
+    conn.release();
+  }
 }
 
 export async function ping() {
