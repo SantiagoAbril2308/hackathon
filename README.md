@@ -106,6 +106,33 @@ Un servicio se publica como **vigente** solo si tiene `estado = 'vigente'`, `url
 
 Los errores siempre tienen la forma `{ "error": "...", "detalles"?: [{ "campo", "mensaje" }] }`.
 
+## Frontend (web + PWA)
+
+Diseño "Propuesta 2 — Claridad que acompaña": tipografías Fraunces y Manrope (empaquetadas, funcionan sin conexión), paleta tranquila con modo claro y oscuro.
+
+| Ruta | Pantalla |
+| --- | --- |
+| `/bienvenida` | 3 pasos, solo la primera vez (con enlace directo a "Necesito apoyo ahora") |
+| `/` | Inicio con buscador y botón "Necesito apoyo ahora" |
+| `/apoyo` | 123 y líneas de apoyo; ligera y disponible sin conexión |
+| `/directorio`, `/directorio/:id` | Directorio con filtros y detalle del servicio |
+| `/mapa` | Leaflet + OpenStreetMap (se carga solo en esta ruta) |
+| `/asistente` | Asistente con aviso fijo y botón de líneas de emergencia |
+| `/actividades`, `/ajustes`, `/acerca` | Actividades aprobadas, preferencias y acceso rápido, información y privacidad |
+| `/admin/*` | Login, cambios pendientes, servicios, verificar, reportes, actividades y fuentes |
+
+PWA: service worker propio (`src/sw.js`, estrategia `injectManifest`) que precarga la app y guarda `/api/directorio.json`; copia del directorio en IndexedDB; manifest con atajo a `/apoyo`; iconos en `public/icons` (`npm run icons` los regenera); "Acceso rápido" en Ajustes con una notificación silenciosa creada con `registration.showNotification()`.
+
+Verificación de punta a punta en un navegador real (Chrome o Edge instalado; en Windows ejecútalo desde PowerShell o CMD):
+
+```bash
+cd frontend
+VITE_API_URL=http://localhost:3000 npm run build
+npm run e2e:pwa
+```
+
+Requiere el backend corriendo en el puerto 3000. Comprueba service worker, manifest, caché, IndexedDB, notificación, `/apoyo` sin conexión (apaga su propio servidor), tiempos y WCAG 2.1 AA con axe-core. Reporte en `docs/e2e-pwa.md`.
+
 ## Asistente (`POST /api/chat`)
 
 `{ "mensaje": "...", "historial"?: [{ "rol": "usuario"|"asistente", "texto": "..." }] }` → `{ origen, emergencia, mensaje, servicios, linea_123, aviso }`. No se guarda nada de la conversación.
