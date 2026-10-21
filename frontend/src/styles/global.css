@@ -944,20 +944,40 @@ a {
   gap: 0.75rem;
 }
 
+/* Franja de borde a borde: el contenido que sube se esconde detrás con un degradado suave. */
 .chat__entrada {
   position: fixed;
+  left: 0;
+  right: 0;
   bottom: var(--alto-nav);
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100%;
-  max-width: var(--ancho-app);
-  padding: 0.6rem var(--margen);
+  padding: 0.6rem var(--margen) 0.7rem;
   background: var(--fondo);
   border-top: 1px solid var(--borde);
   z-index: 40;
 }
 
+.chat__entrada::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 100%;
+  height: 28px;
+  background: linear-gradient(to bottom, transparent, var(--fondo));
+  pointer-events: none;
+}
+
+.chat__entrada-interior {
+  max-width: calc(var(--ancho-app) - 2 * var(--margen));
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .chat__formulario {
+  flex: 1 1 100%;
   display: flex;
   gap: 0.5rem;
   align-items: center;
@@ -980,12 +1000,15 @@ a {
   cursor: pointer;
 }
 
+/* Acceso fijo a las líneas de emergencia: compacto, sin tapar la conversación. */
 .boton-emergencia-fijo {
-  display: flex;
+  flex: none;
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
   gap: 0.4rem;
-  margin-bottom: 0.5rem;
+  padding-inline: 1rem;
+  border-radius: 999px;
+  font-size: 0.875rem;
 }
 
 /* ------------------------------------------------------------------ mapa */
@@ -1648,11 +1671,20 @@ a {
     padding: 1rem 1.25rem;
   }
 
-  /* Asistente: sin barra inferior, la caja de texto va al pie y centrada */
+  /* Asistente: sin barra inferior; emergencia, caja de texto y enviar en una sola fila */
   .chat__entrada {
     bottom: 0;
-    width: min(760px, calc(100% - 4rem));
-    padding: 0.75rem 0 1rem;
+    padding: 0.85rem 2rem 1rem;
+  }
+
+  .chat__entrada-interior {
+    max-width: 760px;
+    flex-wrap: nowrap;
+    gap: 0.75rem;
+  }
+
+  .chat__formulario {
+    flex: 1 1 auto;
   }
 
   /* Bienvenida: ilustración a la izquierda, texto a la derecha */

@@ -115,32 +115,34 @@ export default function Asistente() {
       </section>
 
       <div className="chat__entrada">
-        <Link to="/apoyo" className="boton boton--emergencia boton--pequeno boton-emergencia-fijo">
-          <Phone size={16} aria-hidden="true" /> Líneas de emergencia
-        </Link>
-        <form
-          className="chat__formulario"
-          onSubmit={(e) => {
-            e.preventDefault();
-            enviar(texto);
-          }}
-        >
-          <label htmlFor="mensaje-chat" className="solo-lectores">
-            Escribe un mensaje
-          </label>
-          <input
-            id="mensaje-chat"
-            className="entrada"
-            placeholder="Escribe un mensaje…"
-            value={texto}
-            maxLength={500}
-            autoComplete="off"
-            onChange={(e) => setTexto(e.target.value)}
-          />
-          <button type="submit" className="boton-enviar" aria-label="Enviar mensaje" disabled={enviando || !texto.trim()}>
-            <Send size={20} aria-hidden="true" />
-          </button>
-        </form>
+        <div className="chat__entrada-interior">
+          <Link to="/apoyo" className="boton boton--emergencia boton--pequeno boton-emergencia-fijo">
+            <Phone size={16} aria-hidden="true" /> Líneas de emergencia
+          </Link>
+          <form
+            className="chat__formulario"
+            onSubmit={(e) => {
+              e.preventDefault();
+              enviar(texto);
+            }}
+          >
+            <label htmlFor="mensaje-chat" className="solo-lectores">
+              Escribe un mensaje
+            </label>
+            <input
+              id="mensaje-chat"
+              className="entrada"
+              placeholder="Escribe un mensaje…"
+              value={texto}
+              maxLength={500}
+              autoComplete="off"
+              onChange={(e) => setTexto(e.target.value)}
+            />
+            <button type="submit" className="boton-enviar" aria-label="Enviar mensaje" disabled={enviando || !texto.trim()}>
+              <Send size={20} aria-hidden="true" />
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );
