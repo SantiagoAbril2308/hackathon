@@ -37,7 +37,8 @@ const RespuestaModelo = z.object({
 
 export function crearClienteIA() {
   if (!env.anthropic.apiKey) return null;
-  return new Anthropic({ apiKey: env.anthropic.apiKey, timeout: 20_000, maxRetries: 1 });
+  // Máximo ~25 s con el reintento: menos que lo que espera el navegador (35 s).
+  return new Anthropic({ apiKey: env.anthropic.apiKey, timeout: 12_000, maxRetries: 1 });
 }
 
 /** Contexto compacto para el modelo. Sin teléfonos: las tarjetas los muestran desde la base de datos. */

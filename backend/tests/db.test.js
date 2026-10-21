@@ -1,7 +1,7 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { configuracionPool, validarConfiguracion } from '../src/db/pool.js';
+import { configuracionPool, validarConfiguracion, conReintento, esErrorDeConexion } from '../src/db/pool.js';
 
 const leer = (ruta) => readFileSync(fileURLToPath(new URL(ruta, import.meta.url)), 'utf8');
 const schema = leer('../db/schema.sql');
@@ -35,6 +35,57 @@ describe('pool de conexiones', () => {
 
   it('rechaza nombres de base de datos inseguros', () => {
     expect(() => validarConfiguracion({ host: 'h', user: 'u', password: 'p', name: 'x; DROP' })).toThrow(/DB_NAME/);
+  });
+});
+
+describe('conexiones caídas (TiDB Serverless cierra las inactivas)', () => {
+  const cfg = configuracionPool({ host: 'h', port: 4000, user: 'u', password: 'p', name: 'ruta_serena' });
+
+  it('el pool cierra conexiones inactivas antes que el servidor y usa keep-alive', () => {
+    expect(cfg.idleTimeout).toBeLessThanOrEqual(60_000);
+    expect(cfg.enableKeepAlive).toBe(true);
+    expect(cfg.connectTimeout).toBeGreaterThan(0);
+  });
+
+  it('reintenta una vez si la conexión estaba rota', async () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    let llamadas = 0;
+    const resultado = await conReintento(async () => {
+      llamadas += 1;
+      if (llamadas === 1) throw Object.assign(new Error('Connection lost'), { code: 'PROTOCOL_CONNECTION_LOST' });
+      return 'ok';
+    });
+    expect(resultado).toBe('ok');
+    expect(llamadas).toBe(2);
+  });
+
+  it('no reintenta errores de datos ni reintenta para siempre', async () => {
+    const duplicado = Object.assign(new Error('dup'), { code: 'ER_DUP_ENTRY' });
+    let llamadas = 0;
+    await expect(
+      conReintento(async () => {
+        llamadas += 1;
+        throw duplicado;
+      }),
+    ).rejects.toBe(duplicado);
+    expect(llamadas).toBe(1);
+
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    llamadas = 0;
+    const caida = Object.assign(new Error('reset'), { code: 'ECONNRESET' });
+    await expect(
+      conReintento(async () => {
+        llamadas += 1;
+        throw caida;
+      }),
+    ).rejects.toBe(caida);
+    expect(llamadas).toBe(3); // MAX_INACTIVAS + 1
+  });
+
+  it('reconoce los errores de conexión y los tiempos agotados', () => {
+    expect(esErrorDeConexion({ code: 'PROTOCOL_SEQUENCE_TIMEOUT' })).toBe(true);
+    expect(esErrorDeConexion({ fatal: true })).toBe(true);
+    expect(esErrorDeConexion({ code: 'ER_PARSE_ERROR' })).toBe(false);
   });
 });
 
@@ -75,7 +126,9 @@ describe('seed.sql (solo datos sintéticos)', () => {
   });
 
   it('todos los servicios tienen url_fuente y fecha de verificación', () => {
-    expect(servicios.match(/'https:\/\/fuente-ficticia-[a-z]+\.example\/[^']+', DATE_SUB\(CURDATE\(\), INTERVAL \d+ DAY\)/g)).toHaveLength(20);
+    expect(
+      servicios.match(/'https:\/\/fuente-ficticia-[a-z]+\.example\/[^']+', DATE_SUB\(CURDATE\(\), INTERVAL \d+ DAY\)/g),
+    ).toHaveLength(20);
   });
 
   it('incluye servicios con más de 30 días sin verificar', () => {

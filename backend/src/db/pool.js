@@ -44,8 +44,49 @@ export function configuracionPool(cfg = env.db) {
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0,
+    // TiDB Serverless corta las conexiones inactivas: el pool las cierra antes (idleTimeout)
+    // y mantiene vivas las que usa (keep-alive), para no tomar una conexión muerta.
+    maxIdle: MAX_INACTIVAS,
+    idleTimeout: 60_000,
     enableKeepAlive: true,
+    keepAliveInitialDelay: 10_000,
+    connectTimeout: 10_000,
   });
+}
+
+/** Conexiones inactivas que guarda el pool (todas pueden haber muerto a la vez). */
+export const MAX_INACTIVAS = 2;
+
+/** Tiempo máximo de una consulta: una conexión colgada no debe dejar esperando a la persona. */
+export const TIEMPO_CONSULTA_MS = 10_000;
+
+/** Errores de una conexión rota o colgada: se puede reintentar con otra conexión del pool. */
+const ERRORES_CONEXION = new Set([
+  'PROTOCOL_CONNECTION_LOST',
+  'PROTOCOL_SEQUENCE_TIMEOUT',
+  'ECONNRESET',
+  'EPIPE',
+  'ETIMEDOUT',
+  'ECONNREFUSED',
+]);
+
+export function esErrorDeConexion(err) {
+  return ERRORES_CONEXION.has(err?.code) || err?.fatal === true;
+}
+
+/**
+ * Ejecuta `operacion` y, si falla por una conexión rota, la reintenta. Con MAX_INACTIVAS + 1 intentos
+ * siempre se llega a una conexión nueva, aunque todas las inactivas del pool estuvieran muertas.
+ */
+export async function conReintento(operacion, { intentos = MAX_INACTIVAS + 1 } = {}) {
+  for (let intento = 1; ; intento += 1) {
+    try {
+      return await operacion();
+    } catch (err) {
+      if (intento >= intentos || !esErrorDeConexion(err)) throw err;
+      console.warn(`[db] conexión perdida (${err.code ?? 'fatal'}); reintentando con otra conexión`);
+    }
+  }
 }
 
 let pool = null;
@@ -67,13 +108,29 @@ export function getPool() {
 }
 
 export async function query(sql, params = []) {
-  const [rows] = await getPool().query(sql, params);
-  return rows;
+  return conReintento(async () => {
+    const [rows] = await getPool().query({ sql, timeout: TIEMPO_CONSULTA_MS }, params);
+    return rows;
+  });
+}
+
+/** Toma una conexión del pool que responda; descarta las que estén muertas. */
+async function conexionViva() {
+  return conReintento(async () => {
+    const conn = await getPool().getConnection();
+    try {
+      await conn.query({ sql: 'SELECT 1', timeout: TIEMPO_CONSULTA_MS });
+      return conn;
+    } catch (err) {
+      conn.destroy();
+      throw err;
+    }
+  });
 }
 
 /** Ejecuta `fn(conn)` dentro de una transacción; hace rollback si algo falla. */
 export async function conTransaccion(fn) {
-  const conn = await getPool().getConnection();
+  const conn = await conexionViva();
   try {
     await conn.beginTransaction();
     const resultado = await fn(conn);
@@ -88,13 +145,9 @@ export async function conTransaccion(fn) {
 }
 
 export async function ping() {
-  const conn = await getPool().getConnection();
-  try {
-    await conn.ping();
-    return true;
-  } finally {
-    conn.release();
-  }
+  const conn = await conexionViva();
+  conn.release();
+  return true;
 }
 
 export async function cerrarPool() {

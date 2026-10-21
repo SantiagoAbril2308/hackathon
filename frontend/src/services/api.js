@@ -47,5 +47,5 @@ export const api = {
   emergencia: () => pedir('/api/emergencia'),
   actividades: () => pedir('/api/actividades'),
   reportar: (cuerpo) => pedir('/api/reportes', { metodo: 'POST', cuerpo }),
-  chat: (cuerpo) => pedir('/api/chat', { metodo: 'POST', cuerpo, tiempoMs: 30000 }),
+  chat: (cuerpo) => pedir('/api/chat', { metodo: 'POST', cuerpo, tiempoMs: 35000 }),
 };
