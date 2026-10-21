@@ -39,6 +39,16 @@ export const esquemaReporte = z
   })
   .strict();
 
+export const esquemaChat = z
+  .object({
+    mensaje: texto(500).min(1),
+    historial: z
+      .array(z.object({ rol: z.enum(['usuario', 'asistente']), texto: texto(1000).min(1) }).strict())
+      .max(20)
+      .default([]),
+  })
+  .strict();
+
 // ---------------------------------------------------------------- admin
 export const esquemaLogin = z.object({
   email: z.email().max(190),

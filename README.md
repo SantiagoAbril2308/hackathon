@@ -106,6 +106,25 @@ Un servicio se publica como **vigente** solo si tiene `estado = 'vigente'`, `url
 
 Los errores siempre tienen la forma `{ "error": "...", "detalles"?: [{ "campo", "mensaje" }] }`.
 
+## Asistente (`POST /api/chat`)
+
+`{ "mensaje": "...", "historial"?: [{ "rol": "usuario"|"asistente", "texto": "..." }] }` → `{ origen, emergencia, mensaje, servicios, linea_123, aviso }`. No se guarda nada de la conversación.
+
+1. **Capa de emergencia** (`src/config/emergencia.js`): si el mensaje contiene una expresión de la lista, responde un mensaje fijo y las líneas de emergencia **sin llamar al modelo**. No calcula ni guarda riesgo.
+2. **Prefiltro SQL** por palabras clave (`src/config/temasChat.js`): máximo 8 servicios vigentes del tema; si no hay, los de tema `general`.
+3. **Modelo** (`ANTHROPIC_MODEL`, por ejemplo `claude-haiku-5-5`): system prompt fijo, CONTEXTO sin teléfonos, máximo 6 turnos de historial y salida JSON forzada por esquema.
+4. **Salida segura**: descarta ids que no estén en el CONTEXTO y reemplaza respuestas con consejos clínicos o teléfonos. Si la API falla o el JSON no es válido, responde con las líneas de emergencia.
+
+Límite: 20 mensajes cada 10 minutos por persona.
+
+Evaluación con 40 mensajes sintéticos (`tests/chat-banco.json`), usando la API real (cuesta menos de 1 centavo de dólar):
+
+```bash
+cd backend && npm run eval:chat
+```
+
+Escribe el reporte en `docs/eval-chat.md`. Meta: 100 % sin consejos clínicos, sin ids inventados, sin teléfonos inventados y con la capa de emergencia correcta.
+
 ## Scraper y jobs
 
 El scraper **nunca modifica `servicios`**: solo propone filas en `cambios_pendientes`, que un administrador aprueba o rechaza.

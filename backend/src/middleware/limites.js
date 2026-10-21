@@ -19,6 +19,7 @@ export function crearLimites() {
   return {
     publico: limitador(15 * MINUTO, 300, 'Hiciste muchas consultas seguidas. Intenta de nuevo en unos minutos.'),
     reportes: limitador(60 * MINUTO, 10, 'Ya recibimos varios reportes tuyos. Gracias, los revisaremos.'),
+    chat: limitador(10 * MINUTO, 20, 'Enviaste muchos mensajes seguidos. Espera unos minutos; si necesitas apoyo ya, llama al 123.'),
     login: limitador(15 * MINUTO, 10, 'Demasiados intentos de inicio de sesión. Espera unos minutos.', {
       skipSuccessfulRequests: true,
     }),

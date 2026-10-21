@@ -146,6 +146,37 @@ export async function listarVigentes({ tema, publico, modalidad, q } = {}) {
   return conCanales(filas, aPublico);
 }
 
+/**
+ * Prefiltro del asistente: hasta `limite` servicios vigentes de los temas indicados, priorizando
+ * el público y la modalidad mencionados. Si no hay ninguno, devuelve los de tema 'general'.
+ */
+export async function buscarParaChat({ temas = [], publico, modalidad, limite = 8 } = {}) {
+  const consultar = async (listaTemas) => {
+    const params = [env.diasVigencia, ...listaTemas];
+    const orden = [];
+    if (publico) {
+      orden.push('JSON_CONTAINS(s.publico, JSON_QUOTE(?)) DESC');
+      params.push(publico);
+    }
+    if (modalidad) {
+      orden.push('JSON_CONTAINS(s.modalidad, JSON_QUOTE(?)) DESC');
+      params.push(modalidad);
+    }
+    params.push(limite);
+    return query(
+      `SELECT ${COLUMNAS}, 1 AS es_vigente ${DESDE}
+        WHERE ${CONDICION_VIGENTE}
+          AND (${listaTemas.map(() => 'JSON_CONTAINS(s.temas, JSON_QUOTE(?))').join(' OR ')})
+        ORDER BY ${[...orden, 's.es_emergencia ASC', 's.orden ASC', 's.nombre ASC'].join(', ')}
+        LIMIT ?`,
+      params,
+    );
+  };
+  let filas = temas.length ? await consultar(temas) : [];
+  if (!filas.length) filas = await consultar(['general']);
+  return conCanales(filas, aPublico);
+}
+
 export async function obtenerPublico(id) {
   const [fila] = await query(
     `SELECT ${COLUMNAS}, ${CONDICION_VIGENTE} AS es_vigente ${DESDE}

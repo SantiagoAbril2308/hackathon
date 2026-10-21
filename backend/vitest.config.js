@@ -19,6 +19,9 @@ export default defineConfig({
       DIAS_VIGENCIA: '30',
       DB_NAME: DB_PRUEBAS,
       CORS_ORIGIN: 'http://localhost:5173',
+      // Las pruebas nunca llaman a la API real de Anthropic (usan un cliente simulado).
+      ANTHROPIC_API_KEY: '',
+      JOBS_ACTIVOS: 'false',
     },
   },
 });

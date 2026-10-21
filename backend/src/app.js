@@ -7,12 +7,14 @@ import { manejadorErrores, rutaNoEncontrada } from './middleware/errores.js';
 import { rutasPublicas } from './routes/publicas.js';
 import { rutasAdmin } from './routes/admin.js';
 import { ejecutarScraper as scraperPorDefecto } from './services/scraper.js';
+import { crearAsistente } from './services/asistente.js';
 
 /**
  * @param {object} [opciones]
  * @param {Function} [opciones.ejecutarScraper] permite inyectar el scraper (pruebas)
+ * @param {{ responder: Function }} [opciones.asistente] permite inyectar el asistente (pruebas)
  */
-export function crearApp({ ejecutarScraper = scraperPorDefecto } = {}) {
+export function crearApp({ ejecutarScraper = scraperPorDefecto, asistente = crearAsistente() } = {}) {
   const app = express();
 
   // No se registran IPs: no hay logger de peticiones. En Render hay un proxy delante.
@@ -33,7 +35,7 @@ export function crearApp({ ejecutarScraper = scraperPorDefecto } = {}) {
   const limites = crearLimites();
   // Admin primero para que sus solicitudes no consuman el límite público.
   app.use('/api/admin', rutasAdmin({ limites, ejecutarScraper }));
-  app.use('/api', rutasPublicas({ limites }));
+  app.use('/api', rutasPublicas({ limites, asistente }));
 
   app.use(rutaNoEncontrada);
   app.use(manejadorErrores);
