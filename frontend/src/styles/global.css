@@ -1,0 +1,80 @@
+/* Paleta tranquila y neutra. Contrastes verificados >= 4.5:1 sobre --fondo. */
+:root {
+  --fondo: #f7f6f2;
+  --superficie: #ffffff;
+  --texto: #1f2a2e;
+  --texto-suave: #4a5559;
+  --primario: #2f5d62;
+  --primario-texto: #ffffff;
+  --borde: #c9cfcc;
+  --aviso-fondo: #e8efe9;
+  --foco: #b3541e;
+  --radio: 10px;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-size: 100%;
+  line-height: 1.5;
+  color: var(--texto);
+  background: var(--fondo);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--fondo);
+  color: var(--texto);
+}
+
+a {
+  color: var(--primario);
+}
+
+:focus-visible {
+  outline: 3px solid var(--foco);
+  outline-offset: 2px;
+}
+
+button,
+.boton {
+  min-height: 48px;
+  min-width: 48px;
+  padding: 0.75rem 1.25rem;
+  border-radius: var(--radio);
+  border: 1px solid var(--primario);
+  background: var(--primario);
+  color: var(--primario-texto);
+  font: inherit;
+  cursor: pointer;
+}
+
+.saltar {
+  position: absolute;
+  left: -9999px;
+}
+
+.saltar:focus {
+  left: 1rem;
+  top: 1rem;
+  background: var(--superficie);
+  padding: 0.5rem 1rem;
+  z-index: 100;
+}
+
+.aviso {
+  background: var(--aviso-fondo);
+  border-bottom: 1px solid var(--borde);
+  padding: 0.75rem 1rem;
+  text-align: center;
+}
+
+.aviso p {
+  margin: 0;
+}
+
+.contenedor {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 1rem;
+}

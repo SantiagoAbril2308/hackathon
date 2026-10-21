@@ -1,0 +1,88 @@
+# Ruta Serena
+
+Directorio y navegador de servicios de salud mental para Villavicencio y el Meta (Colombia). Ayuda a encontrar líneas de apoyo y servicios institucionales verificados, siempre con **fuente oficial** y **fecha de verificación** visibles.
+
+> Ruta Serena no es un servicio de salud. Si tu vida o la de alguien está en peligro, llama al 123.
+
+Hackathon Villavicencio 2026 · Entrega: 22 de octubre de 2026 · Meta: TRL 4 (funciones críticas integradas y probadas en entorno controlado con datos sintéticos).
+
+## Qué hace y qué NO hace
+
+| Hace | No hace |
+| --- | --- |
+| Muestra servicios verificados con fuente y fecha | No diagnostica ni evalúa riesgo |
+| Marca "en revisión" lo que lleva más de 30 días sin verificar | No recomienda tratamientos ni medicamentos |
+| Funciona sin conexión para las líneas de apoyo | No incluye ejercicios terapéuticos ni de respiración |
+| Asistente que solo orienta hacia servicios del directorio | No guarda conversaciones, no tiene cuentas públicas, no registra IPs |
+
+## Estructura
+
+```
+ruta-serena/
+  backend/    API Node.js + Express + MySQL (TiDB Cloud Serverless)
+  frontend/   React + Vite + PWA + Leaflet/OpenStreetMap
+  docs/       evidencia TRL 4, fuentes oficiales y declaración
+```
+
+## Requisitos
+
+- Node.js 20 o superior y npm
+- Git
+- [gitleaks](https://github.com/gitleaks/gitleaks) (obligatorio para hacer commits): `winget install Gitleaks.Gitleaks`
+- Una base de datos en TiDB Cloud Serverless (puerto 4000, TLS)
+- Una API key de Anthropic (solo para el asistente)
+
+## Instalación
+
+```bash
+git clone <url-del-repo> ruta-serena
+cd ruta-serena
+git config core.hooksPath .githooks
+cd backend && npm install
+cd ../frontend && npm install
+```
+
+## Configuración
+
+1. Copia `backend/.env.example` a `backend/.env` y llena:
+   - `DB_HOST`, `DB_PORT` (4000), `DB_USER`, `DB_PASSWORD`, `DB_NAME` (ruta_serena)
+   - `JWT_SECRET`: cadena aleatoria larga (por ejemplo `node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"`)
+   - `ANTHROPIC_API_KEY` y `ANTHROPIC_MODEL`
+   - `CORS_ORIGIN`: `http://localhost:5173` en desarrollo
+   - `SCRAPER_CRON` (por defecto `0 3 * * *`) y `DIAS_VIGENCIA` (por defecto 30)
+   - `ADMIN_SEED_EMAIL` y `ADMIN_SEED_PASSWORD`: administrador inicial
+2. Copia `frontend/.env.example` a `frontend/.env` y llena `VITE_API_URL` (`http://localhost:3000` en desarrollo).
+
+Los archivos `.env` están en `.gitignore` y el hook de pre-commit bloquea cualquier intento de subirlos.
+
+## Ejecución
+
+```bash
+# Backend (puerto 3000)
+cd backend
+npm run db:migrate   # crea las tablas (fase 1)
+npm run db:seed      # carga datos sintéticos y el admin (fase 1)
+npm run dev
+
+# Frontend (puerto 5173)
+cd frontend
+npm run dev
+```
+
+## Pruebas
+
+```bash
+cd backend && npm test
+cd frontend && npm test
+```
+
+## Reglas del proyecto
+
+- Cero datos reales: el seed y las pruebas usan servicios ficticios con teléfonos `000-000-00XX` y `es_sintetico = true`.
+- Cero credenciales en el repositorio: gitleaks corre antes de cada commit.
+- Nada se muestra como vigente sin `url_fuente` oficial y `fecha_verificacion`.
+- Lenguaje amable y simple, sin términos clínicos ni iconos estigmatizantes.
+
+## Licencia
+
+MIT

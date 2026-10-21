@@ -1,0 +1,40 @@
+title = "Ruta Serena - reglas de gitleaks"
+
+# Usa todas las reglas por defecto de gitleaks (AWS, GitHub, JWT, llaves privadas, etc.)
+[extend]
+useDefault = true
+
+# Llaves de Anthropic
+[[rules]]
+id = "anthropic-api-key"
+description = "Anthropic API key"
+regex = '''sk-ant-[A-Za-z0-9_\-]{20,}'''
+tags = ["key", "anthropic"]
+
+# Cadenas de conexión MySQL/TiDB con contraseña embebida
+[[rules]]
+id = "mysql-connection-string"
+description = "Cadena de conexión MySQL con contraseña"
+regex = '''mysql://[^:\s/]+:[^@\s]+@[^\s]+'''
+tags = ["db", "mysql"]
+
+# Asignaciones de secretos con valor en archivos .env o código
+[[rules]]
+id = "ruta-serena-env-secret"
+description = "Variable secreta con valor asignado"
+regex = '''(?i)(DB_PASSWORD|JWT_SECRET|ANTHROPIC_API_KEY|ADMIN_SEED_PASSWORD)\s*[=:]\s*['"]?[^\s'"#]{6,}'''
+tags = ["secret", "env"]
+
+[[allowlists]]
+description = "Archivos y valores permitidos"
+regexTarget = "match"
+paths = [
+  '''(^|/)\.env\.example$''',
+  '''(^|/)package-lock\.json$''',
+  '''(^|/)node_modules/''',
+]
+# Referencias a process.env y valores de prueba explícitos no son secretos
+regexes = [
+  '''process\.env\.[A-Z_]+''',
+  '''test-secret-[a-z0-9-]+''',
+]

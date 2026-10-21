@@ -1,0 +1,22 @@
+#!/bin/sh
+# Ruta Serena: gitleaks corre antes de cada commit (reglamento del reto).
+# Activar con: git config core.hooksPath .githooks
+
+if ! command -v gitleaks >/dev/null 2>&1; then
+  echo "[pre-commit] ERROR: gitleaks no está instalado. Instálalo (winget install Gitleaks.Gitleaks) y reintenta."
+  exit 1
+fi
+
+# Bloquea cualquier archivo .env real en el área de preparación
+if git diff --cached --name-only | grep -E '(^|/)\.env($|\.)' | grep -v '\.env\.example$' >/dev/null; then
+  echo "[pre-commit] ERROR: intentas subir un archivo .env. Quítalo con: git restore --staged <archivo>"
+  exit 1
+fi
+
+gitleaks git --pre-commit --staged --redact --config .gitleaks.toml --no-banner
+status=$?
+if [ $status -ne 0 ]; then
+  echo "[pre-commit] gitleaks encontró posibles secretos. Commit cancelado."
+  exit $status
+fi
+echo "[pre-commit] gitleaks: sin secretos."

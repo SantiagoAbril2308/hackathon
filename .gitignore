@@ -1,0 +1,29 @@
+# Dependencias
+node_modules/
+
+# Variables de entorno (NUNCA subir credenciales)
+.env
+.env.*
+!.env.example
+
+# Builds
+dist/
+build/
+dev-dist/
+coverage/
+
+# Android / Capacitor (fase 8)
+frontend/android/app/build/
+*.apk
+*.aab
+*.keystore
+*.jks
+
+# Logs y sistema
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.idea/
