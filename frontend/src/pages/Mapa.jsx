@@ -33,7 +33,12 @@ export default function Mapa() {
           attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
         }).addTo(m);
 
-        const icono = L.divIcon({ className: '', html: '<span class="marcador"></span>', iconSize: [22, 22], iconAnchor: [11, 11] });
+        const icono = L.divIcon({
+          className: '',
+          html: '<span class="marcador"></span>',
+          iconSize: [22, 22],
+          iconAnchor: [11, 11],
+        });
         const limites = [];
         for (const s of conUbicacion) {
           // Contenido del popup construido con nodos (sin HTML de los datos).
@@ -74,25 +79,29 @@ export default function Mapa() {
   return (
     <>
       <Encabezado titulo="Mapa" />
-      <p className="texto-suave pequeno">Servicios presenciales verificados en Villavicencio. Los nombres y lugares de prueba son ficticios.</p>
-      <div ref={contenedor} className="mapa" role="region" aria-label="Mapa de servicios presenciales" />
-      {errorMapa && (
-        <p className="mensaje-estado mensaje-estado--error" role="alert">
-          {errorMapa}
-        </p>
-      )}
+      <p className="texto-suave pequeno">
+        Servicios presenciales verificados en Villavicencio. Los nombres y lugares de prueba son ficticios.
+      </p>
+      <div className="mapa-diseno">
+        <div ref={contenedor} className="mapa" role="region" aria-label="Mapa de servicios presenciales" />
+        {errorMapa && (
+          <p className="mensaje-estado mensaje-estado--error" role="alert">
+            {errorMapa}
+          </p>
+        )}
 
-      <section className="seccion" aria-labelledby="lista-mapa">
-        <h2 id="lista-mapa">Servicios en el mapa</h2>
-        <ul style={{ paddingLeft: '1.1rem' }}>
-          {conUbicacion.map((s) => (
-            <li key={s.id} style={{ marginBottom: 6 }}>
-              <Link to={`/directorio/${s.id}`}>{s.nombre}</Link>
-              <span className="texto-suave pequeno"> — {s.direccion}</span>
-            </li>
-          ))}
-        </ul>
-      </section>
+        <section className="seccion mapa-lista" aria-labelledby="lista-mapa">
+          <h2 id="lista-mapa">Servicios en el mapa</h2>
+          <ul style={{ paddingLeft: '1.1rem' }}>
+            {conUbicacion.map((s) => (
+              <li key={s.id} style={{ marginBottom: 6 }}>
+                <Link to={`/directorio/${s.id}`}>{s.nombre}</Link>
+                <span className="texto-suave pequeno"> — {s.direccion}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      </div>
     </>
   );
 }

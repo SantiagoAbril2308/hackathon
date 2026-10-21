@@ -22,7 +22,7 @@ export function Simbolo({ tamano = 40, titulo }) {
 
 export default function Logo({ tamano = 72, lema = true }) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+    <div className="logo">
       <Simbolo tamano={tamano} />
       <span style={{ fontFamily: 'var(--fuente-titulo)', fontSize: tamano * 0.42, fontWeight: 600, lineHeight: 1 }}>
         Ruta

@@ -42,25 +42,31 @@ export default function Bienvenida() {
         </button>
       </div>
 
-      <Logo tamano={64} />
-      <div className="bienvenida__ilustracion">
-        <Ilustracion />
+      <div className="bienvenida__cuerpo">
+        <div className="bienvenida__logo">
+          <Logo tamano={64} />
+        </div>
+        <div className="bienvenida__ilustracion">
+          <Ilustracion />
+        </div>
+
+        <div className="bienvenida__panel">
+          <section aria-live="polite">
+            <h1>{PASOS[paso].titulo}</h1>
+            <p className="texto-suave">{PASOS[paso].texto}</p>
+          </section>
+
+          <div className="bienvenida__puntos" aria-label={`Paso ${paso + 1} de ${PASOS.length}`} role="img">
+            {PASOS.map((p, i) => (
+              <span key={p.titulo} aria-current={i === paso ? 'step' : undefined} />
+            ))}
+          </div>
+
+          <button type="button" className="boton boton--bloque" onClick={() => (ultimo ? terminar() : setPaso(paso + 1))}>
+            {ultimo ? 'Empezar' : 'Siguiente'} <ArrowRight size={18} aria-hidden="true" />
+          </button>
+        </div>
       </div>
-
-      <section aria-live="polite">
-        <h1>{PASOS[paso].titulo}</h1>
-        <p className="texto-suave">{PASOS[paso].texto}</p>
-      </section>
-
-      <div className="bienvenida__puntos" aria-label={`Paso ${paso + 1} de ${PASOS.length}`} role="img">
-        {PASOS.map((p, i) => (
-          <span key={p.titulo} aria-current={i === paso ? 'step' : undefined} />
-        ))}
-      </div>
-
-      <button type="button" className="boton boton--bloque" onClick={() => (ultimo ? terminar() : setPaso(paso + 1))}>
-        {ultimo ? 'Empezar' : 'Siguiente'} <ArrowRight size={18} aria-hidden="true" />
-      </button>
       <AvisoCompacto />
     </main>
   );

@@ -20,7 +20,7 @@ export default function Acerca() {
   ];
 
   return (
-    <>
+    <div className="lectura">
       <Encabezado titulo="Acerca de" />
       <div style={{ margin: '0.5rem 0 1.5rem' }}>
         <Logo tamano={56} />
@@ -46,8 +46,8 @@ export default function Acerca() {
         <h2 id="titulo-fuentes">Fuentes y verificación</h2>
         <p>
           Un servicio solo aparece como vigente si tiene un enlace a su fuente oficial y fue verificado en los últimos 30 días. Si
-          pasa más tiempo, o si varias personas reportan que no funciona, queda “en revisión” hasta que el equipo lo confirme.
-          Los cambios detectados automáticamente en las fuentes nunca se publican sin revisión humana.
+          pasa más tiempo, o si varias personas reportan que no funciona, queda “en revisión” hasta que el equipo lo confirme. Los
+          cambios detectados automáticamente en las fuentes nunca se publican sin revisión humana.
         </p>
         {fuentes.length > 0 && (
           <ul>
@@ -82,8 +82,8 @@ export default function Acerca() {
       <section className="seccion" aria-labelledby="prueba">
         <h2 id="prueba">Datos de prueba</h2>
         <p>
-          Esta versión (Hackathon Villavicencio 2026, TRL 4) usa servicios ficticios con teléfonos 000-000-00XX para demostrar
-          su funcionamiento. No llames a esos números.
+          Esta versión (Hackathon Villavicencio 2026, TRL 4) usa servicios ficticios con teléfonos 000-000-00XX para demostrar su
+          funcionamiento. No llames a esos números.
         </p>
       </section>
 
@@ -93,6 +93,6 @@ export default function Acerca() {
           Mapas © colaboradores de OpenStreetMap. Iconos: Lucide (ISC). Tipografías: Fraunces y Manrope (SIL Open Font License).
         </p>
       </section>
-    </>
+    </div>
   );
 }

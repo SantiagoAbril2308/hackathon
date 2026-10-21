@@ -21,6 +21,7 @@ const DIST = join(RAIZ, 'dist');
 const PUERTO = 5173;
 const BASE = `http://localhost:${PUERTO}`;
 const API = process.env.E2E_API ?? 'http://localhost:3000';
+const ANCHOS = [320, 375, 768, 1024, 1440];
 const RUTAS_A11Y = ['/', '/bienvenida', '/apoyo', '/directorio', '/directorio/7', '/mapa', '/asistente', '/actividades', '/ajustes', '/acerca'];
 const NAVEGADORES = [
   process.env.E2E_NAVEGADOR,
@@ -243,11 +244,16 @@ async function main() {
     servidor = await servirDist();
 
     // ---------------------------------------------------------------- accesibilidad
-    for (const oscuro of [false, true]) {
-      await caso('CP-12', `WCAG 2.1 AA con axe-core (modo ${oscuro ? 'oscuro' : 'claro'}) en ${RUTAS_A11Y.length} pantallas`, async () => {
+    // Claro, oscuro por preferencia del sistema (modo automático) y oscuro elegido en Ajustes.
+    for (const [modo, oscuro, manual] of [
+      ['claro', false, false],
+      ['oscuro del sistema', true, false],
+      ['oscuro elegido en Ajustes', false, true],
+    ]) {
+      await caso('CP-12', `WCAG 2.1 AA con axe-core (modo ${modo}) en ${RUTAS_A11Y.length} pantallas`, async () => {
         const fallas = [];
         const p = await nuevaPagina(navegador, { oscuro });
-        if (oscuro) await p.evaluateOnNewDocument(() => localStorage.setItem('rs-apariencia', 'oscuro'));
+        if (manual) await p.evaluateOnNewDocument(() => localStorage.setItem('rs-apariencia', 'oscuro'));
         for (const ruta of RUTAS_A11Y) {
           if (ruta === '/bienvenida') await p.evaluateOnNewDocument(() => localStorage.removeItem('rs-bienvenida-vista'));
           await p.goto(`${BASE}${ruta}`, { waitUntil: 'networkidle0' });
@@ -264,6 +270,38 @@ async function main() {
         return 'sin violaciones';
       });
     }
+
+    await caso('RESP', `Sin desborde horizontal en ${ANCHOS.join(', ')} px (${RUTAS_A11Y.length} pantallas)`, async () => {
+      const problemas = [];
+      const p = await nuevaPagina(navegador);
+      for (const ancho of ANCHOS) {
+        await p.setViewport({ width: ancho, height: 900, isMobile: ancho < 768, hasTouch: ancho < 768 });
+        for (const ruta of RUTAS_A11Y) {
+          await p.goto(`${BASE}${ruta}`, { waitUntil: 'networkidle0' });
+          const r = await p.evaluate(() => {
+            const ancho = document.documentElement.clientWidth;
+            // Contenedores que desplazan a propósito (chips, tablas, mapa) no cuentan.
+            const desplazables = '.chips, .tabla-contenedor, .admin__lateral, .leaflet-container';
+            // Lo que recorta un ancestro (overflow: hidden/auto, o un SVG) no se ve y no desborda la página.
+            const recortado = (e) => {
+              for (let a = e.parentElement; a && a !== document.body; a = a.parentElement) {
+                if (getComputedStyle(a).overflowX !== 'visible') return true;
+              }
+              return false;
+            };
+            const fuera = [...document.querySelectorAll('body *')]
+              .filter((e) => !e.closest(desplazables) && e.getClientRects().length && !recortado(e))
+              .filter((e) => e.getBoundingClientRect().right > ancho + 1)
+              .map((e) => `${e.tagName.toLowerCase()}.${[...e.classList].join('.')}`);
+            return { scroll: document.documentElement.scrollWidth > ancho, fuera: [...new Set(fuera)].slice(0, 3) };
+          });
+          if (r.scroll || r.fuera.length) problemas.push(`${ancho}px ${ruta}: ${r.fuera.join(', ') || 'scroll horizontal'}`);
+        }
+      }
+      await p.close();
+      afirmar(problemas.length === 0, problemas.join(' | '));
+      return `${ANCHOS.length * RUTAS_A11Y.length} combinaciones sin desborde`;
+    });
 
     await caso('A11Y', 'Botones y controles de al menos 48 px', async () => {
       const p = await nuevaPagina(navegador);

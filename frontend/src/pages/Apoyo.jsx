@@ -47,7 +47,7 @@ export default function Apoyo() {
         ))}
       </div>
 
-      <section className="tarjeta tarjeta--emergencia" aria-labelledby="titulo-123">
+      <section className="tarjeta tarjeta--emergencia apoyo__123" aria-labelledby="titulo-123">
         <h2 id="titulo-123" style={{ fontFamily: 'var(--fuente-ui)', fontSize: '1rem', fontWeight: 700 }}>
           Emergencias
         </h2>
@@ -65,27 +65,33 @@ export default function Apoyo() {
       {emergencia.length > 0 && (
         <section className="seccion" aria-labelledby="titulo-emergencia">
           <h2 id="titulo-emergencia">Líneas para hablar ahora</h2>
-          {emergencia.map((s) => (
-            <TarjetaServicio key={s.id} servicio={s} />
-          ))}
+          <div className="lista-servicios">
+            {emergencia.map((s) => (
+              <TarjetaServicio key={s.id} servicio={s} />
+            ))}
+          </div>
         </section>
       )}
 
       {pestana !== 'meta' && nacionales.length > 0 && (
         <section className="seccion" aria-labelledby="titulo-nacionales">
           <h2 id="titulo-nacionales">Líneas nacionales</h2>
-          {nacionales.map((s) => (
-            <TarjetaServicio key={s.id} servicio={s} />
-          ))}
+          <div className="lista-servicios">
+            {nacionales.map((s) => (
+              <TarjetaServicio key={s.id} servicio={s} />
+            ))}
+          </div>
         </section>
       )}
 
       {pestana !== 'nacionales' && delMeta.length > 0 && (
         <section className="seccion" aria-labelledby="titulo-meta">
           <h2 id="titulo-meta">Líneas del Meta</h2>
-          {delMeta.map((s) => (
-            <TarjetaServicio key={s.id} servicio={s} />
-          ))}
+          <div className="lista-servicios">
+            {delMeta.map((s) => (
+              <TarjetaServicio key={s.id} servicio={s} />
+            ))}
+          </div>
         </section>
       )}
 

@@ -41,9 +41,13 @@ describe('inicio', () => {
   it('tiene buscador, botón "Necesito apoyo ahora" y navegación accesible', async () => {
     renderizar('/');
     expect(screen.getByRole('heading', { level: 1, name: 'Aquí para tu bienestar' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /Necesito apoyo ahora/ })).toHaveAttribute('href', '/apoyo');
+    // Botón principal del inicio y botón fijo de la cabecera: ambos llevan a /apoyo.
+    const apoyo = screen.getAllByRole('link', { name: /Necesito apoyo ahora/ });
+    expect(apoyo.length).toBeGreaterThanOrEqual(1);
+    apoyo.forEach((enlace) => expect(enlace).toHaveAttribute('href', '/apoyo'));
     expect(screen.getByRole('searchbox', { name: 'Buscar servicio, tema o lugar' })).toBeInTheDocument();
-    expect(screen.getByRole('navigation', { name: 'Navegación principal' })).toBeInTheDocument();
+    // Dos navegaciones en el DOM (cabecera para pantallas grandes y barra inferior en móvil); el CSS muestra una sola.
+    expect(screen.getAllByRole('navigation', { name: 'Navegación principal' })).toHaveLength(2);
     expect(screen.getByRole('link', { name: 'Ir al contenido' })).toHaveAttribute('href', '#contenido');
     expect(await screen.findByText(/Última actualización/)).toBeInTheDocument();
   });

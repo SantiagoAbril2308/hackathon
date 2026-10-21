@@ -6,7 +6,8 @@ import TarjetaServicio from '../components/TarjetaServicio.jsx';
 import { api } from '../services/api.js';
 
 export const AVISO_ASISTENTE = 'Soy un asistente de información, no un profesional de salud.';
-const SALUDO = 'Hola, ¿en qué puedo ayudarte? Puedo mostrarte líneas y servicios de apoyo disponibles en Villavicencio y el Meta.';
+const SALUDO =
+  'Hola, ¿en qué puedo ayudarte? Puedo mostrarte líneas y servicios de apoyo disponibles en Villavicencio y el Meta.';
 const SUGERENCIA = 'Necesito hablar con alguien ahora';
 const MAX_HISTORIAL = 12;
 
@@ -57,7 +58,7 @@ export default function Asistente() {
   }
 
   return (
-    <>
+    <div className="lectura">
       <Encabezado titulo="Asistente" />
       <p className="banner" role="note" style={{ position: 'sticky', top: 0, zIndex: 30 }}>
         <Info size={18} aria-hidden="true" />
@@ -65,7 +66,9 @@ export default function Asistente() {
       </p>
 
       <p className="solo-lectores" aria-live="polite">
-        {ultima && !enviando ? `El asistente respondió: ${ultima.texto}${ultima.servicios?.length ? ` Con ${ultima.servicios.length} opciones de servicio.` : ''}` : ''}
+        {ultima && !enviando
+          ? `El asistente respondió: ${ultima.texto}${ultima.servicios?.length ? ` Con ${ultima.servicios.length} opciones de servicio.` : ''}`
+          : ''}
       </p>
       <section className="chat" aria-label="Conversación">
         {mensajes.map((m, i) => (
@@ -86,7 +89,11 @@ export default function Asistente() {
             )}
             {m.servicios?.length > 0 && (
               <div className="chat__servicios">
-                {!m.emergencia && <p className="pequeno" style={{ margin: 0, fontWeight: 600 }}>Aquí tienes algunas opciones disponibles:</p>}
+                {!m.emergencia && (
+                  <p className="pequeno" style={{ margin: 0, fontWeight: 600 }}>
+                    Aquí tienes algunas opciones disponibles:
+                  </p>
+                )}
                 {m.servicios.map((s) => (
                   <TarjetaServicio key={s.id} servicio={s} nivel={2} />
                 ))}
@@ -135,6 +142,6 @@ export default function Asistente() {
           </button>
         </form>
       </div>
-    </>
+    </div>
   );
 }

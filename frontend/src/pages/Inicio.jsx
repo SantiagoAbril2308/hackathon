@@ -31,7 +31,8 @@ export default function Inicio() {
 
   return (
     <>
-      <header className="encabezado encabezado--izquierda" style={{ gridTemplateColumns: '1fr auto' }}>
+      {/* Marca y "Acerca de" solo en móvil: en pantallas grandes están en la cabecera del sitio. */}
+      <header className="encabezado encabezado--izquierda inicio__marca" style={{ gridTemplateColumns: '1fr auto' }}>
         <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <Simbolo tamano={30} />
           <span style={{ fontFamily: 'var(--fuente-titulo)', fontWeight: 600, fontSize: '1.1rem' }}>Ruta Serena</span>
@@ -43,47 +44,47 @@ export default function Inicio() {
 
       <section className="inicio__hero">
         <Ilustracion className="inicio__ilustracion" variante="esquina" />
-        <p className="saludo">
-          {saludo()} <Sun size={16} color="#F2A93B" aria-hidden="true" style={{ verticalAlign: '-2px' }} />
-        </p>
-        <h1>Aquí para tu bienestar</h1>
-        <p className="texto-suave">
-          Líneas y servicios de apoyo oficiales, claros y confiables.
-        </p>
+        <div className="inicio__texto">
+          <p className="saludo">
+            {saludo()} <Sun size={16} color="#F2A93B" aria-hidden="true" style={{ verticalAlign: '-2px' }} />
+          </p>
+          <h1>Aquí para tu bienestar</h1>
+          <p className="texto-suave inicio__lema">Líneas y servicios de apoyo oficiales, claros y confiables.</p>
+
+          <Link to="/apoyo" className="cta-apoyo">
+            <span className="cta-apoyo__icono">
+              <Phone size={22} aria-hidden="true" />
+            </span>
+            <span>
+              Necesito apoyo ahora
+              <br />
+              <span style={{ fontWeight: 500, fontSize: '0.85rem' }}>Líneas para hablar con alguien</span>
+            </span>
+            <span>
+              <ChevronRight size={22} aria-hidden="true" />
+            </span>
+          </Link>
+
+          <form role="search" onSubmit={buscar} className="buscador">
+            <label htmlFor="busqueda-inicio" className="solo-lectores">
+              Buscar servicio, tema o lugar
+            </label>
+            <Search size={18} aria-hidden="true" />
+            <input
+              id="busqueda-inicio"
+              className="entrada"
+              type="search"
+              placeholder="Buscar servicio, tema o lugar…"
+              value={busqueda}
+              onChange={(e) => setBusqueda(e.target.value)}
+              maxLength={100}
+            />
+          </form>
+        </div>
       </section>
 
-      <Link to="/apoyo" className="cta-apoyo">
-        <span className="cta-apoyo__icono">
-          <Phone size={22} aria-hidden="true" />
-        </span>
-        <span>
-          Necesito apoyo ahora
-          <br />
-          <span style={{ fontWeight: 500, fontSize: '0.85rem' }}>Líneas para hablar con alguien</span>
-        </span>
-        <span>
-          <ChevronRight size={22} aria-hidden="true" />
-        </span>
-      </Link>
-
-      <form role="search" onSubmit={buscar} className="buscador" style={{ marginBottom: '1rem' }}>
-        <label htmlFor="busqueda-inicio" className="solo-lectores">
-          Buscar servicio, tema o lugar
-        </label>
-        <Search size={18} aria-hidden="true" />
-        <input
-          id="busqueda-inicio"
-          className="entrada"
-          type="search"
-          placeholder="Buscar servicio, tema o lugar…"
-          value={busqueda}
-          onChange={(e) => setBusqueda(e.target.value)}
-          maxLength={100}
-        />
-      </form>
-
-      <nav aria-label="Secciones">
-        <ul className="cuadricula" style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+      <nav aria-label="Secciones" className="inicio__accesos">
+        <ul className="cuadricula">
           {ACCESOS.map(({ a, titulo, texto, Icono }) => (
             <li key={a}>
               <Link to={a} className="acceso">
@@ -98,8 +99,10 @@ export default function Inicio() {
         </ul>
       </nav>
 
-      <EstadoConexion guardadoEn={guardadoEn} />
-      <Aviso123 />
+      <div className="inicio__pie">
+        <EstadoConexion guardadoEn={guardadoEn} />
+        <Aviso123 />
+      </div>
     </>
   );
 }

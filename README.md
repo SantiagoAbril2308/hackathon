@@ -110,6 +110,14 @@ Los errores siempre tienen la forma `{ "error": "...", "detalles"?: [{ "campo", 
 
 Diseño "Propuesta 2 — Claridad que acompaña": tipografías Fraunces y Manrope (empaquetadas, funcionan sin conexión), paleta tranquila con modo claro y oscuro.
 
+Diseño adaptable, pensado primero para el celular:
+
+| Pantalla | Ancho | Navegación y distribución |
+| --- | --- | --- |
+| Móvil | < 768 px (probado desde 320 px) | Barra inferior; tarjetas en una columna |
+| Tablet | 768–1023 px | Cabecera superior con "Necesito apoyo ahora" fijo; tarjetas en 2 columnas |
+| Computador | ≥ 1024 px (3 columnas desde 1280 px) | Cabecera superior; inicio, detalle, mapa y bienvenida en dos paneles |
+
 | Ruta | Pantalla |
 | --- | --- |
 | `/bienvenida` | 3 pasos, solo la primera vez (con enlace directo a "Necesito apoyo ahora") |

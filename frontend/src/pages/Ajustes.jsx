@@ -9,7 +9,8 @@ import { MODOS, leerApariencia, guardarApariencia } from '../services/apariencia
 import { fechaHora } from '../services/formato.js';
 
 const MENSAJES = {
-  denegado: 'No se pudo activar porque el permiso de notificaciones está bloqueado. Puedes permitirlo en la configuración del navegador.',
+  denegado:
+    'No se pudo activar porque el permiso de notificaciones está bloqueado. Puedes permitirlo en la configuración del navegador.',
   no_compatible: 'Este navegador no permite notificaciones de acceso rápido.',
 };
 
@@ -36,7 +37,11 @@ export default function Ajustes() {
         // PWA-05: el permiso de notificaciones se pide únicamente en este momento.
         const r = await activar();
         setAccesoRapido(r.ok);
-        setAviso(r.ok ? { tipo: 'ok', texto: 'Listo: verás una notificación silenciosa para llegar rápido a las líneas de apoyo.' } : { tipo: 'error', texto: MENSAJES[r.motivo] });
+        setAviso(
+          r.ok
+            ? { tipo: 'ok', texto: 'Listo: verás una notificación silenciosa para llegar rápido a las líneas de apoyo.' }
+            : { tipo: 'error', texto: MENSAJES[r.motivo] },
+        );
       }
     } catch {
       setAviso({ tipo: 'error', texto: 'No se pudo cambiar el acceso rápido. Intenta de nuevo.' });
@@ -46,7 +51,7 @@ export default function Ajustes() {
   }
 
   return (
-    <>
+    <div className="lectura">
       <Encabezado titulo="Ajustes" />
 
       <section className="seccion" aria-labelledby="preferencias" style={{ marginTop: 0 }}>
@@ -79,7 +84,8 @@ export default function Ajustes() {
             <span id="acceso-rapido-etiqueta" style={{ fontWeight: 600 }}>
               Acceso rápido
               <span className="descripcion" id="acceso-rapido-descripcion">
-                Muestra una notificación silenciosa que abre las líneas de apoyo con un toque, también desde la pantalla de bloqueo.
+                Muestra una notificación silenciosa que abre las líneas de apoyo con un toque, también desde la pantalla de
+                bloqueo.
               </span>
             </span>
             <button
@@ -103,7 +109,11 @@ export default function Ajustes() {
         </ul>
         {!esCompatible() && <p className="pequeno texto-suave">{MENSAJES.no_compatible}</p>}
         {aviso && (
-          <p className={`mensaje-estado ${aviso.tipo === 'error' ? 'mensaje-estado--error' : ''}`} role={aviso.tipo === 'error' ? 'alert' : 'status'} style={{ marginTop: '0.75rem' }}>
+          <p
+            className={`mensaje-estado ${aviso.tipo === 'error' ? 'mensaje-estado--error' : ''}`}
+            role={aviso.tipo === 'error' ? 'alert' : 'status'}
+            style={{ marginTop: '0.75rem' }}
+          >
             {aviso.texto}
           </p>
         )}
@@ -144,6 +154,6 @@ export default function Ajustes() {
           ))}
         </ul>
       </section>
-    </>
+    </div>
   );
 }
