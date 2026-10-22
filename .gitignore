@@ -19,6 +19,15 @@ frontend/android/app/build/
 *.aab
 *.keystore
 *.jks
+*.p12
+*.pfx
+*.idsig
+
+# Android TWA (android/): proyecto generado, APK, QR y propiedades locales
+android/proyecto/
+android/salida/
+local.properties
+keystore.properties
 
 # Logs y sistema
 *.log

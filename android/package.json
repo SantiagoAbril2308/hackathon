@@ -1,0 +1,26 @@
+{
+  "name": "ruta-serena-android",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "APK Android (Trusted Web Activity) que abre la versión web publicada de Ruta Serena.",
+  "scripts": {
+    "requisitos": "node scripts/requisitos.mjs",
+    "clave:crear": "node scripts/crear-clave.mjs",
+    "assetlinks": "node scripts/assetlinks.mjs",
+    "assetlinks:verificar": "node scripts/verificar-assetlinks.mjs",
+    "apk": "node scripts/compilar.mjs",
+    "qr": "node scripts/qr.mjs todos",
+    "qr:web": "node scripts/qr.mjs web",
+    "qr:apk": "node scripts/qr.mjs apk",
+    "test": "node --test scripts/*.test.mjs"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@bubblewrap/core": "1.25.0",
+    "qrcode": "1.5.4"
+  }
+}

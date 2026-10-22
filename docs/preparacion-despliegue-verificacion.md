@@ -54,6 +54,35 @@ El Blueprint mantiene `JOBS_ACTIVOS=false` en la demostración para no escribir 
 El asistente necesita configurar sus variables privadas de IA tras revisar las salvaguardas; sin ellas usa su respaldo.
 Estas limitaciones impiden considerar esta preparación como una operación pública completa.
 
+## APK Android (TWA): preparación del 21 de octubre de 2026
+
+Archivos: `android/` (paquete propio con `package.json`, `package-lock.json`, `distribucion.json`, `README.md`
+y `scripts/`), `frontend/vercel.json`, `frontend/src/pwa/despliegue.test.js` (una prueba nueva), `.gitignore`,
+`docs/despliegue.md` y esta sección. No se modificaron backend, APIs, base de datos, datos de servicios, service worker,
+manifest, IndexedDB, asistente, temas ni la lógica de la web.
+
+Estado del despliegue comprobado: no hay proyecto de Vercel vinculado ni dominio publicado registrado en el repositorio.
+La única URL `onrender.com` presente es un valor de prueba de `despliegue.test.js`. Por eso `urlWeb`, `urlDescargaApk`
+y `packageId` quedan en `null`, y no existe todavía `assetlinks.json`: se generan con la clave y el dominio reales.
+
+| Comprobación | Resultado | Alcance |
+| --- | --- | --- |
+| `npm.cmd test` en `frontend` | 79/79, 11 archivos | 78 anteriores y 1 nueva sobre `/.well-known/assetlinks.json` |
+| `npm.cmd run build` en `frontend` | Correcto, 55 entradas de precarga | Sin cambios en el service worker |
+| Vite copia `public/.well-known/` a `dist` | Sí | Proyecto mínimo en carpeta temporal |
+| `npm.cmd test` en `android` | 4/4 | Validación de URL, `assetlinks` y ubicación de la clave |
+| `npm.cmd run requisitos` | Detecta JDK 21 (Android Studio), SDK, build-tools 36.1.0 y android-36; bloquea por falta de clave y dominio | Esperado |
+| `qr`, `qr:web`, `apk` sin dominio o con `http://localhost` | Rechazados con explicación | Esperado |
+| Ensayo completo en carpeta temporal | Clave desechable → `assetlinks` → TWA → Gradle → `zipalign` → `apksigner` → verificación de huella → QR | Validación sintáctica desactivada solo en la copia para usar el build local. **Esa APK no es distribuible** |
+| Rechazo a sobrescribir clave y `assetlinks.json` | Correcto | |
+| Contenido de la APK de ensayo | `targetSdk` 36; permisos: solo `POST_NOTIFICATIONS` y el interno de AndroidX | Sin ubicación, cámara ni otros |
+| `assetlinks:verificar` | Detecta respuesta 404/HTML y acepta JSON correcto | Servidores locales; falta verificar en el dominio real |
+
+Pendiente, porque depende del dominio publicado o de un dispositivo: compilar la APK real, verificar Digital Asset
+Links en producción, instalar en un Android físico (no había dispositivo conectado por `adb`), comprobar navegación,
+llamadas, WhatsApp, temas, modo sin conexión y Acceso rápido, y demostrar que un despliegue web aparece en la APK
+sin reinstalarla.
+
 Esquemas técnicos consultados:
 
 - https://openapi.vercel.sh/vercel.json

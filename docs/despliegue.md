@@ -129,7 +129,22 @@ Las notificaciones web en iPhone/iPad requieren una aplicación añadida a la pa
 una versión compatible del sistema (iOS/iPadOS 16.4 o posterior) y permiso solicitado desde un toque.
 Falta comprobar el comportamiento en dispositivos físicos; no se certifica con una simulación de navegador.
 
-## 5. Comprobación reproducible, sin tocar la base de datos
+## 5. APK Android (Trusted Web Activity)
+
+La carpeta `android/` genera una APK instalable sin Play Store que abre la web publicada (no una copia empaquetada).
+Guía completa, comandos y gestión de la clave: [`android/README.md`](../android/README.md).
+
+- Requiere el **dominio HTTPS definitivo** del frontend en `android/distribucion.json` (`urlWeb`). Mientras no exista,
+  `npm.cmd run requisitos`, `apk` y `qr:web` se detienen con una explicación; no se usa localhost ni túneles.
+- Digital Asset Links: `npm.cmd run assetlinks` genera `frontend/public/.well-known/assetlinks.json` a partir de la
+  clave real. `vercel.json` excluye `/.well-known/` del fallback SPA y lo sirve como `application/json`.
+  Tras publicar, comprobar con `npm.cmd run assetlinks:verificar`.
+- La clave de firma vive fuera del repositorio y debe conservarse para todas las versiones.
+- Los cambios web normales llegan a la APK con el despliegue; la caché del service worker hace que aparezcan
+  tras la descarga en segundo plano o en la siguiente apertura, no al instante.
+- Instalar la APK no añade notificaciones push: se conserva el Acceso rápido, voluntario y sin permisos al iniciar.
+
+## 6. Comprobación reproducible, sin tocar la base de datos
 
 Desde `frontend`, en PowerShell:
 

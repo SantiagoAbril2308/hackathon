@@ -6,7 +6,7 @@ services:
     runtime: node
     plan: free
     rootDir: backend
-    branch: feat/redesign-ruta-serena
+    branch: main
     autoDeployTrigger: "off"
     buildCommand: npm ci --omit=dev
     startCommand: npm start
