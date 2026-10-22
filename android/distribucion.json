@@ -1,6 +1,6 @@
 {
   "urlWeb": "https://ruta-serena.vercel.app",
-  "urlDescargaApk": null,
+  "urlDescargaApk": "https://github.com/SantiagoAbril2308/hackathon/releases/latest/download/ruta-serena.apk",
   "packageId": "app.vercel.ruta_serena.twa",
   "versionCode": 1,
   "versionName": "1.0.0",
