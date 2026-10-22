@@ -27,9 +27,9 @@ Meta del reto: **TRL 4**, es decir, funciones críticas integradas y probadas en
 | 4 | Asistente con límites y evaluación de 40 mensajes | ✅ Terminada |
 | 5 | Frontend web y PWA (con el diseño de Figma) | ✅ Terminada |
 | — | Diseño adaptable (móvil, tablet y computador) y correcciones | ✅ Terminado |
-| 6 | Evidencia TRL 4, declaración y tabla de fuentes | ⏳ Pendiente |
-| 7 | Despliegue (Render + Vercel) | ⏳ Pendiente |
-| 8 | APK con Capacitor (solo si se pide) | ⏳ Opcional |
+| 6 | Evidencia TRL 4, declaración y tabla de fuentes | ✅ Terminada (faltan las pruebas manuales en el teléfono y con lector de pantalla) |
+| 7 | Despliegue: web en https://ruta-serena.vercel.app y API en https://ruta-serena.onrender.com | ✅ Publicado |
+| 8 | APK Android (TWA con Bubblewrap, en lugar de Capacitor): release v1.0.0 en GitHub y QR | ✅ Publicada (falta probarla en un teléfono) |
 
 ---
 
