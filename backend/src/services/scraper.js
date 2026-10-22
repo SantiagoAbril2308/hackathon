@@ -41,15 +41,29 @@ export function crearLimitadorPorDominio(intervaloMs, { ahora = Date.now, dormir
   const ultimaSolicitud = new Map();
   const colas = new Map();
 
+  /**
+   * Espera el turno del dominio y devuelve `liberar`, que se llama cuando la solicitud TERMINA.
+   * El intervalo se cuenta desde el fin de la anterior: el sitio nunca ve dos solicitudes más
+   * juntas que `intervaloMs`, aunque la red retrase alguna.
+   */
   return function turno(dominio) {
     const previo = colas.get(dominio) ?? Promise.resolve();
-    const actual = previo.then(async () => {
+    let liberar;
+    const terminada = new Promise((resolver) => {
+      liberar = () => {
+        ultimaSolicitud.set(dominio, ahora());
+        resolver();
+      };
+    });
+    const permiso = previo.then(async () => {
       const espera = (ultimaSolicitud.get(dominio) ?? -Infinity) + intervaloMs - ahora();
       if (espera > 0) await esperar(espera);
-      ultimaSolicitud.set(dominio, ahora());
     });
-    colas.set(dominio, actual.catch(() => {}));
-    return actual;
+    colas.set(
+      dominio,
+      permiso.then(() => terminada).catch(() => {}),
+    );
+    return permiso.then(() => liberar);
   };
 }
 
@@ -63,8 +77,7 @@ export function calcularCambios({ conocidos, encontrados, primeraLectura, texto,
 
   const faltan = conocidos.filter(
     (c, i, arr) =>
-      !encontradosDig.has(soloDigitos(c.valor)) &&
-      arr.findIndex((o) => soloDigitos(o.valor) === soloDigitos(c.valor)) === i,
+      !encontradosDig.has(soloDigitos(c.valor)) && arr.findIndex((o) => soloDigitos(o.valor) === soloDigitos(c.valor)) === i,
   );
   const nuevos = encontrados.filter((t) => !conocidosDig.has(t.digitos));
   const prioridadDe = (c) => 2 + (c.es_emergencia ? 5 : 0);
@@ -81,7 +94,13 @@ export function calcularCambios({ conocidos, encontrados, primeraLectura, texto,
     });
   }
   for (const c of faltan.slice(pares)) {
-    cambios.push({ servicio_id: c.servicio_id, campo: c.tipo, valor_anterior: c.valor, valor_nuevo: null, prioridad: prioridadDe(c) });
+    cambios.push({
+      servicio_id: c.servicio_id,
+      campo: c.tipo,
+      valor_anterior: c.valor,
+      valor_nuevo: null,
+      prioridad: prioridadDe(c),
+    });
   }
   // En la primera lectura no se proponen números sueltos: solo se fija la línea base.
   if (!primeraLectura) {
@@ -132,21 +151,25 @@ export function crearScraper({
     const url = new URL(direccion);
     const motivo = urlValida(url);
     if (motivo) throw new Error(motivo);
-    await turno(url.hostname);
-    return http.get(url.href, {
-      responseType: 'text',
-      transformResponse: [(d) => d],
-      timeout: TIEMPO_MAXIMO_MS,
-      maxContentLength: TAMANO_MAXIMO_BYTES,
-      maxRedirects: MAX_REDIRECCIONES,
-      validateStatus: () => true,
-      headers: { 'User-Agent': USER_AGENT, Accept: 'text/html,text/plain;q=0.9,*/*;q=0.1' },
-      beforeRedirect: (opciones) => {
-        const destino = new URL(`${opciones.protocol}//${opciones.hostname}`);
-        const problema = urlValida(destino);
-        if (problema) throw new Error(`redirección bloqueada: ${problema}`);
-      },
-    });
+    const liberar = await turno(url.hostname);
+    try {
+      return await http.get(url.href, {
+        responseType: 'text',
+        transformResponse: [(d) => d],
+        timeout: TIEMPO_MAXIMO_MS,
+        maxContentLength: TAMANO_MAXIMO_BYTES,
+        maxRedirects: MAX_REDIRECCIONES,
+        validateStatus: () => true,
+        headers: { 'User-Agent': USER_AGENT, Accept: 'text/html,text/plain;q=0.9,*/*;q=0.1' },
+        beforeRedirect: (opciones) => {
+          const destino = new URL(`${opciones.protocol}//${opciones.hostname}`);
+          const problema = urlValida(destino);
+          if (problema) throw new Error(`redirección bloqueada: ${problema}`);
+        },
+      });
+    } finally {
+      liberar();
+    }
   }
 
   /** robots.txt por origen, cacheado durante una ejecución. 4xx = todo permitido; error/5xx = nada permitido. */
@@ -185,7 +208,12 @@ export function crearScraper({
     const nodos = fuente.selector_css ? $(fuente.selector_css) : $('body');
     if (!nodos.length) return { estado: 'error', motivo: 'el selector_css no encontró contenido' };
 
-    const texto = normalizarTexto(nodos.map((_, el) => $(el).text()).get().join('\n'));
+    const texto = normalizarTexto(
+      nodos
+        .map((_, el) => $(el).text())
+        .get()
+        .join('\n'),
+    );
     return { estado: 'leida', texto, hash: sha256(texto), telefonos: extraerTelefonos(texto, { aceptarSinteticos }) };
   }
 

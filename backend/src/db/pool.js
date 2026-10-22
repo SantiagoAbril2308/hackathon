@@ -44,18 +44,22 @@ export function configuracionPool(cfg = env.db) {
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0,
-    // TiDB Serverless corta las conexiones inactivas: el pool las cierra antes (idleTimeout)
-    // y mantiene vivas las que usa (keep-alive), para no tomar una conexión muerta.
-    maxIdle: MAX_INACTIVAS,
-    idleTimeout: 60_000,
+    // TiDB Serverless corta en silencio las conexiones inactivas (la consulta se queda colgada).
+    // En mysql2, idleTimeout solo cierra las inactivas que superan maxIdle: con maxIdle 0 ninguna
+    // conexión pasa más de IDLE_MS sin usarse, así el pool nunca entrega una conexión vieja.
+    maxIdle: 0,
+    idleTimeout: IDLE_MS,
     enableKeepAlive: true,
     keepAliveInitialDelay: 10_000,
     connectTimeout: 10_000,
   });
 }
 
-/** Conexiones inactivas que guarda el pool (todas pueden haber muerto a la vez). */
-export const MAX_INACTIVAS = 2;
+/** Tiempo que una conexión puede quedar sin usarse antes de que el pool la cierre. */
+export const IDLE_MS = 20_000;
+
+/** Intentos ante una conexión rota (la primera más dos reintentos con conexiones nuevas). */
+export const MAX_INTENTOS = 3;
 
 /** Tiempo máximo de una consulta: una conexión colgada no debe dejar esperando a la persona. */
 export const TIEMPO_CONSULTA_MS = 10_000;
@@ -75,10 +79,10 @@ export function esErrorDeConexion(err) {
 }
 
 /**
- * Ejecuta `operacion` y, si falla por una conexión rota, la reintenta. Con MAX_INACTIVAS + 1 intentos
- * siempre se llega a una conexión nueva, aunque todas las inactivas del pool estuvieran muertas.
+ * Ejecuta `operacion` y, si falla por una conexión rota, la reintenta con otra conexión
+ * (red de seguridad: con maxIdle 0 casi nunca debería hacer falta).
  */
-export async function conReintento(operacion, { intentos = MAX_INACTIVAS + 1 } = {}) {
+export async function conReintento(operacion, { intentos = MAX_INTENTOS } = {}) {
   for (let intento = 1; ; intento += 1) {
     try {
       return await operacion();

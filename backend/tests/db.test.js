@@ -42,7 +42,8 @@ describe('conexiones caídas (TiDB Serverless cierra las inactivas)', () => {
   const cfg = configuracionPool({ host: 'h', port: 4000, user: 'u', password: 'p', name: 'ruta_serena' });
 
   it('el pool cierra conexiones inactivas antes que el servidor y usa keep-alive', () => {
-    expect(cfg.idleTimeout).toBeLessThanOrEqual(60_000);
+    expect(cfg.idleTimeout).toBeLessThanOrEqual(30_000);
+    expect(cfg.maxIdle).toBe(0); // ninguna conexión inactiva sobrevive al idleTimeout
     expect(cfg.enableKeepAlive).toBe(true);
     expect(cfg.connectTimeout).toBeGreaterThan(0);
   });
@@ -79,7 +80,7 @@ describe('conexiones caídas (TiDB Serverless cierra las inactivas)', () => {
         throw caida;
       }),
     ).rejects.toBe(caida);
-    expect(llamadas).toBe(3); // MAX_INACTIVAS + 1
+    expect(llamadas).toBe(3); // MAX_INTENTOS
   });
 
   it('reconoce los errores de conexión y los tiempos agotados', () => {

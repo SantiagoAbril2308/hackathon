@@ -1,13 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { extraerTelefonos, soloDigitos } from '../src/utils/telefonos.js';
 import { parsearRobots, rutaPermitida } from '../src/utils/robots.js';
-import {
-  dominioPermitido,
-  crearLimitadorPorDominio,
-  calcularCambios,
-  normalizarTexto,
-  sha256,
-} from '../src/services/scraper.js';
+import { dominioPermitido, crearLimitadorPorDominio, calcularCambios, normalizarTexto, sha256 } from '../src/services/scraper.js';
 import { USER_AGENT, INTERVALO_POR_DOMINIO_MS, LISTA_BLANCA_POR_DEFECTO } from '../src/config/scraper.js';
 
 // Números con formato colombiano válido pero rellenos de ceros (no corresponden a líneas reales).
@@ -23,10 +17,7 @@ describe('extracción de teléfonos colombianos', () => {
   });
 
   it('detecta celulares de 10 dígitos que empiezan con 3', () => {
-    expect(valores('Escríbenos al 300 000 0000 o al +573100000000')).toEqual([
-      'celular:300 000 0000',
-      'celular:310 000 0000',
-    ]);
+    expect(valores('Escríbenos al 300 000 0000 o al +573100000000')).toEqual(['celular:300 000 0000', 'celular:310 000 0000']);
   });
 
   it('detecta líneas cortas de 3 dígitos, incluso al final de una frase', () => {
@@ -112,7 +103,9 @@ describe('límite de 1 solicitud cada N ms por dominio', () => {
         reloj += ms;
       },
     });
-    await Promise.all([turno('a.gov.co'), turno('a.gov.co'), turno('b.gov.co'), turno('a.gov.co')]);
+    // Cada "solicitud" pide su turno y libera el dominio al terminar.
+    const solicitar = async (dominio) => (await turno(dominio))();
+    await Promise.all([solicitar('a.gov.co'), solicitar('a.gov.co'), solicitar('b.gov.co'), solicitar('a.gov.co')]);
     expect(esperas).toEqual([5000, 5000]); // solo el 2.º y 3.º de a.gov.co esperan
   });
 });
@@ -138,7 +131,13 @@ describe('cálculo de cambios (sin efectos)', () => {
   });
 
   it('da más prioridad a los servicios de emergencia', () => {
-    const [c] = calcularCambios({ conocidos, encontrados: [t('000-000-0005')], primeraLectura: false, texto: 'x', ultimoHash: 'h' });
+    const [c] = calcularCambios({
+      conocidos,
+      encontrados: [t('000-000-0005')],
+      primeraLectura: false,
+      texto: 'x',
+      ultimoHash: 'h',
+    });
     expect(c).toMatchObject({ servicio_id: 1, valor_nuevo: null, prioridad: 7 });
   });
 
