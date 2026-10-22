@@ -86,6 +86,14 @@ function versionJdk(dir) {
 }
 
 /** Busca un JDK 17 o posterior: JAVA_HOME, el JDK de Android Studio o C:\Program Files\Java. */
+/** Gradle 8.11 (el que usa el proyecto TWA) solo se ejecuta con JDK 17 a 23. */
+export const JDK_MAXIMO_GRADLE = 23;
+
+/**
+ * Elige un JDK compatible con Gradle: el primero entre JAVA_HOME, el de Android Studio y los de
+ * Program Files\Java que esté entre 17 y JDK_MAXIMO_GRADLE. Un JDK más nuevo (por ejemplo 25)
+ * hace fallar Gradle con "Unsupported class file major version", así que solo se usa si no hay otro.
+ */
 export function buscarJdk() {
   const candidatos = [];
   if (process.env.JAVA_HOME) candidatos.push(process.env.JAVA_HOME);
@@ -97,12 +105,13 @@ export function buscarJdk() {
       for (const nombre of readdirSync(java).filter((n) => n.startsWith('jdk')).sort().reverse()) candidatos.push(join(java, nombre));
     }
   }
+  const validos = [];
   for (const dir of candidatos) {
     const version = versionJdk(dir);
     const ejecutable = join(dir, 'bin', process.platform === 'win32' ? 'keytool.exe' : 'keytool');
-    if (version && version >= 17 && existsSync(ejecutable)) return { dir, version };
+    if (version && version >= 17 && existsSync(ejecutable)) validos.push({ dir, version });
   }
-  return null;
+  return validos.find((jdk) => jdk.version <= JDK_MAXIMO_GRADLE) ?? validos[0] ?? null;
 }
 
 export function buscarSdkAndroid() {
