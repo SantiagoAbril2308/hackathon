@@ -1,0 +1,9 @@
+# No subir configuración local, dependencias ni resultados de pruebas.
+.env
+.env.*
+node_modules
+dist
+dev-dist
+coverage
+.vercel
+*.log

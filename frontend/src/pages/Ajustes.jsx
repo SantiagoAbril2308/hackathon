@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Sun, Bell, Accessibility, RefreshCw, Database, ShieldCheck, FileText, Info, ChevronRight } from 'lucide-react';
 import Encabezado from '../components/Encabezado.jsx';
+import InstalarAplicacion from '../components/InstalarAplicacion.jsx';
 import { useDirectorio } from '../hooks/useDirectorio.js';
 import { leerPreferencias } from '../services/almacen.js';
 import { activar, desactivar, esCompatible } from '../services/accesoRapido.js';
@@ -53,6 +54,8 @@ export default function Ajustes() {
   return (
     <div className="lectura">
       <Encabezado titulo="Ajustes" />
+
+      <InstalarAplicacion />
 
       <section className="seccion" aria-labelledby="preferencias" style={{ marginTop: 0 }}>
         <h2 id="preferencias">Preferencias</h2>

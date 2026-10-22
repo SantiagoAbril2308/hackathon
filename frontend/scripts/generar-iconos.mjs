@@ -9,20 +9,25 @@ import sharp from 'sharp';
 
 const DESTINO = fileURLToPath(new URL('../public/icons/', import.meta.url));
 const PRIMARIO = '#164F3B';
-const SECUNDARIO = '#2E7D64';
-const HOJA_CLARA = '#7DB88F';
-const ACENTO = '#F2A93B';
+const SECUNDARIO = '#4e9376';
+const HOJA_CLARA = '#91c4a7';
+const ACENTO = '#f3b34c';
 
-/** Sol + rayos + dos hojas, dibujado en una caja de 512 centrada en (256, 256) con escala `s`. */
-function simbolo({ s = 1, sol = ACENTO, rayos = ACENTO, hojaIzq = SECUNDARIO, hojaDer = HOJA_CLARA, vena = true } = {}) {
+/** La misma silueta de Logo.jsx, centrada y con camino transparente. */
+function simbolo({ s = 1, sol = ACENTO, rayos = ACENTO, hojaIzq = SECUNDARIO, hojaDer = HOJA_CLARA } = {}) {
   const t = (256 * (1 - s)).toFixed(2);
-  const rayo = (ang) => `<rect x="250" y="70" width="12" height="40" rx="6" fill="${rayos}" transform="rotate(${ang} 256 196)"/>`;
   return `<g transform="translate(${t} ${t}) scale(${s})">
-    ${[-60, -30, 0, 30, 60].map(rayo).join('')}
-    <circle cx="256" cy="196" r="70" fill="${sol}"/>
-    <path d="M256 404 C 166 398 104 330 112 236 C 196 236 252 296 256 404 Z" fill="${hojaIzq}"/>
-    <path d="M256 404 C 346 398 408 330 400 236 C 316 236 260 296 256 404 Z" fill="${hojaDer}"/>
-    ${vena ? `<path d="M256 404 C 250 340 232 300 196 270" stroke="${PRIMARIO}" stroke-width="8" fill="none" stroke-linecap="round" opacity=".35"/>` : ''}
+    <g transform="translate(56 40) scale(4)">
+      <defs><mask id="ruta-camino"><rect width="100" height="108" fill="white"/>
+        <path d="M38 101C35 88 63 79 58 69C55 63 49 62 53 56C56 51 65 47 75 44C61 52 58 57 61 62C66 69 70 74 64 82C58 91 50 94 48 101Z" fill="black"/>
+      </mask></defs>
+      <path d="M50 4V11M27 11L31 17M72 11L68 17M11 28L18 31M89 28L82 31" fill="none" stroke="${rayos}" stroke-width="2.8" stroke-linecap="round"/>
+      <circle cx="50" cy="38" r="21" fill="${sol}"/>
+      <g mask="url(#ruta-camino)">
+        <path d="M48 100C22 96 8 76 10 46C35 46 50 63 51 86Z" fill="${hojaIzq}"/>
+        <path d="M48 100C77 97 94 73 90 44C64 43 45 62 48 100Z" fill="${hojaDer}"/>
+      </g>
+    </g>
   </g>`;
 }
 
@@ -37,9 +42,9 @@ const ARCHIVOS = {
   // Maskable: fondo a sangre y símbolo dentro de la zona segura (80 %)
   'icono-maskable.svg': svg(simbolo({ s: 0.62 }), { fondo: PRIMARIO }),
   // Badge monocromático: Android usa solo el canal alfa (silueta blanca sobre transparente)
-  'badge.svg': svg(simbolo({ s: 0.95, sol: '#fff', rayos: '#fff', hojaIzq: '#fff', hojaDer: '#fff', vena: false })),
+  'badge.svg': svg(simbolo({ s: 0.95, sol: '#fff', rayos: '#fff', hojaIzq: '#fff', hojaDer: '#fff' })),
   // Logo sin fondo para la interfaz
-  'logo.svg': svg(simbolo()),
+  'logo.svg': svg(simbolo({ hojaIzq: '#1b5945', hojaDer: '#6aa58b' })),
 };
 
 const PNG = [
