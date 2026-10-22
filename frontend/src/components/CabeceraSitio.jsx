@@ -1,6 +1,6 @@
 import { Link, NavLink } from 'react-router-dom';
 import { Phone } from 'lucide-react';
-import { Simbolo } from './Logo.jsx';
+import Logo from './Logo.jsx';
 
 const ENLACES = [
   { a: '/', texto: 'Inicio', fin: true },
@@ -20,8 +20,7 @@ export default function CabeceraSitio() {
     <header className="sitio-cabecera">
       <div className="sitio-cabecera__interior">
         <Link to="/" className="sitio-cabecera__marca" aria-label="Ruta Serena, ir al inicio">
-          <Simbolo tamano={34} />
-          <span>Ruta Serena</span>
+          <Logo tamano={46} lema={false} horizontal />
         </Link>
         <nav aria-label="Navegación principal" className="sitio-cabecera__nav">
           {ENLACES.map(({ a, texto, fin }) => (

@@ -9,8 +9,10 @@ import '@fontsource/manrope/latin-700.css';
 import './styles/global.css';
 import App from './App.jsx';
 import { aplicarApariencia } from './services/apariencia.js';
+import { iniciarInstalacion } from './services/instalacion.js';
 
 aplicarApariencia();
+iniciarInstalacion();
 
 // PWA-02: service worker propio. Se actualiza solo cuando hay una versión nueva.
 if ('serviceWorker' in navigator) {

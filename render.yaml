@@ -1,0 +1,38 @@
+# Preparación de una demostración: no crea bases de datos ni ejecuta migraciones/seed.
+# Publicar este Blueprint requiere aprobación y que la rama esté disponible en GitHub.
+services:
+  - type: web
+    name: ruta-serena-api
+    runtime: node
+    plan: free
+    rootDir: backend
+    branch: feat/redesign-ruta-serena
+    autoDeployTrigger: "off"
+    buildCommand: npm ci --omit=dev
+    startCommand: npm start
+    healthCheckPath: /api/salud
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: NODE_ENV
+        value: production
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        value: "4000"
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_NAME
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CORS_ORIGIN
+        sync: false
+      - key: DIAS_VIGENCIA
+        value: "30"
+      # Evita que iniciar la API ejecute un vencimiento y modifique la base existente.
+      # Su activación y el alojamiento de los jobs se revisan por separado.
+      - key: JOBS_ACTIVOS
+        value: "false"

@@ -47,19 +47,29 @@ export default function Bienvenida() {
           <Logo tamano={64} />
         </div>
         <div className="bienvenida__ilustracion">
-          <Ilustracion />
+          <p className="bienvenida__territorio">Villavicencio · Meta</p>
+          <Ilustracion variante="bienvenida" />
+          <p className="bienvenida__paisaje-texto">
+            Cada camino comienza<br />con un primer paso.
+          </p>
         </div>
 
         <div className="bienvenida__panel">
           <section aria-live="polite">
-            <h1>{PASOS[paso].titulo}</h1>
-            <p className="texto-suave">{PASOS[paso].texto}</p>
+            <div className="bienvenida__paso" key={paso}>
+              <p className="bienvenida__etiqueta">Te damos la bienvenida</p>
+              <h1>{PASOS[paso].titulo}</h1>
+              <p className="texto-suave">{PASOS[paso].texto}</p>
+            </div>
           </section>
 
-          <div className="bienvenida__puntos" aria-label={`Paso ${paso + 1} de ${PASOS.length}`} role="img">
-            {PASOS.map((p, i) => (
-              <span key={p.titulo} aria-current={i === paso ? 'step' : undefined} />
-            ))}
+          <div className="bienvenida__progreso">
+            <div className="bienvenida__puntos" aria-label={`Paso ${paso + 1} de ${PASOS.length}`} role="img">
+              {PASOS.map((p, i) => (
+                <span key={p.titulo} aria-current={i === paso ? 'step' : undefined} />
+              ))}
+            </div>
+            <span className="bienvenida__contador" aria-hidden="true">Paso {paso + 1} de {PASOS.length}</span>
           </div>
 
           <button type="button" className="boton boton--bloque" onClick={() => (ultimo ? terminar() : setPaso(paso + 1))}>

@@ -11,6 +11,7 @@ dist/
 build/
 dev-dist/
 coverage/
+.vercel/
 
 # Android / Capacitor (fase 8)
 frontend/android/app/build/
