@@ -34,4 +34,13 @@ describe('API del frontend publicado', () => {
     expect(regla.test('/api')).toBe(false);
     expect(regla.test('/api/directorio.json')).toBe(false);
   });
+
+  it('sirve Digital Asset Links como JSON real, sin el fallback HTML', () => {
+    const configuracion = JSON.parse(readFileSync(resolve('vercel.json'), 'utf8'));
+    const regla = new RegExp(`^${configuracion.rewrites[0].source}$`);
+    expect(regla.test('/.well-known/assetlinks.json')).toBe(false);
+    expect(regla.test('/well-known')).toBe(true);
+    const cabeceras = configuracion.headers.find((h) => h.source === '/.well-known/assetlinks.json')?.headers ?? [];
+    expect(cabeceras).toContainEqual({ key: 'Content-Type', value: 'application/json' });
+  });
 });
