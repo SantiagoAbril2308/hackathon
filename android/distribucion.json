@@ -1,7 +1,7 @@
 {
   "urlWeb": "https://ruta-serena.vercel.app",
   "urlDescargaApk": null,
-  "packageId": null,
+  "packageId": "app.vercel.ruta_serena.twa",
   "versionCode": 1,
   "versionName": "1.0.0",
   "aliasClave": "ruta-serena"

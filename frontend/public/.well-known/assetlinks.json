@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "app.vercel.ruta_serena.twa",
+      "sha256_cert_fingerprints": [
+        "15:A5:E4:14:93:B1:4B:E0:7B:C7:FA:80:7B:4D:B8:35:FE:21:72:8F:89:80:05:CF:EE:15:71:72:5F:1D:25:8B"
+      ]
+    }
+  }
+]
